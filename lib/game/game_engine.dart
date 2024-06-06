@@ -23,6 +23,7 @@ class CMatcherGameEngine {
         correctMatches.add(i);
       }
     }
+    print("REF: ${Utils.printList(referenceArray)}");
     return correctMatches;
   }
 

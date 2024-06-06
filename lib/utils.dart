@@ -42,4 +42,13 @@ class Utils {
         return "Unknown Color";
     }
   }
+
+  static String printList(List<Color> colors) {
+    String colorsString = '';
+    for (var color in colors) {
+      colorsString += " ";
+      colorsString += getColorName(color);
+    }
+    return colorsString;
+  }
 }

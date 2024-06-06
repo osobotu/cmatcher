@@ -25,21 +25,8 @@ class GameController {
         _gameEngine.getCorrectMatches(_userColors.value).length;
   }
 
-  String updateUserColors({
-    required int fromIndex,
-    required int toIndex,
-  }) {
-    if (fromIndex < 0 ||
-        fromIndex >= _userColors.value.length ||
-        toIndex < 0 ||
-        toIndex >= _userColors.value.length) {
-      return "Invalid index";
-    }
-
-    Color temp = _userColors.value[fromIndex];
-    _userColors.value[fromIndex] = _userColors.value[toIndex];
-    _userColors.value[toIndex] = temp;
+  void updateUserColors({required List<Color> colors}) {
+    _userColors.value = colors;
     _getCorrectColors();
-    return "Exchanged ${_userColors.value[fromIndex]} and ${_userColors.value[toIndex]}";
   }
 }
