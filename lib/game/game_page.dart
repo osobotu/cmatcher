@@ -109,6 +109,8 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
               FloatingActionButton(
                 onPressed: () {
                   gameController.reset();
+                  undoStack.clear();
+                  redoStack.clear();
                 },
                 tooltip: 'Reset',
                 child: const Icon(Icons.restore),
