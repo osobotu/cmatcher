@@ -1,5 +1,6 @@
 import 'package:cmatcher/game/game_controller.dart';
 import 'package:cmatcher/game/game_engine.dart';
+import 'package:cmatcher/game/move.dart';
 import 'package:cmatcher/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,9 @@ class CMatcherGamePage extends StatefulWidget {
 
 class _CMatcherGamePageState extends State<CMatcherGamePage> {
   late GameController gameController;
+
+  List<GameMove> undoStack = [];
+  List<GameMove> redoStack = [];
 
   @override
   void initState() {
@@ -77,6 +81,11 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
                           final fromIndex = colors.indexOf(fromColor);
                           final newColors = swapItems(fromIndex, index);
                           gameController.updateUserColors(colors: newColors);
+                          // add fromIndex and toIndex to undo stack
+                          final gameMove = GameMove(from: fromIndex, to: index);
+                          undoStack.add(gameMove);
+                          // clear redo stack
+                          redoStack.clear();
                         },
                         builder: (context, candidateData, rejectedData) {
                           return ColorWidget(color: color);
@@ -93,7 +102,12 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               FloatingActionButton(
-                onPressed: () {},
+                onPressed: () {
+                  final lastMove = undoStack.removeLast();
+                  final newColors = swapItems(lastMove.to, lastMove.from);
+                  gameController.updateUserColors(colors: newColors);
+                  redoStack.add(lastMove);
+                },
                 tooltip: 'Undo',
                 child: const Icon(Icons.undo),
               ),
@@ -105,7 +119,12 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
                 child: const Icon(Icons.restore),
               ),
               FloatingActionButton(
-                onPressed: () {},
+                onPressed: () {
+                  final lastMove = redoStack.removeLast();
+                  final newColors = swapItems(lastMove.from, lastMove.to);
+                  gameController.updateUserColors(colors: newColors);
+                  undoStack.add(lastMove);
+                },
                 tooltip: 'Redo',
                 child: const Icon(Icons.redo),
               ),
