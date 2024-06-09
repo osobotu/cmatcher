@@ -48,14 +48,9 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
           ValueListenableBuilder(
             valueListenable: gameController.correctColors,
             builder: (context, numberOfCorrectColors, _) {
-              if (numberOfCorrectColors == 5) {
-                return Text(
-                  "Whoops! All colors match",
-                  style: Theme.of(context).textTheme.titleMedium,
-                );
-              }
+              String message = Utils.getMessage(numberOfCorrectColors);
               return Text(
-                "$numberOfCorrectColors color(s) are correctly placed",
+                message,
                 style: Theme.of(context).textTheme.titleMedium,
               );
             },

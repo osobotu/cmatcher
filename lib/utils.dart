@@ -51,4 +51,17 @@ class Utils {
     }
     return colorsString;
   }
+
+  static String getMessage(int numberOfCorrectColors) {
+    switch (numberOfCorrectColors) {
+      case 0:
+        return "You have no colors matched.";
+      case 1:
+        return "You have matched 1 color";
+      case 5:
+        return "Hooray! All colors match!";
+      default:
+        return "You have matched $numberOfCorrectColors colors";
+    }
+  }
 }

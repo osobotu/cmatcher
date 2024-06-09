@@ -13,17 +13,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Color Matcher Game',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         useMaterial3: true,
       ),
       home: const CMatcherGamePage(title: 'Color Matcher'),
-      // home: Scaffold(
-      //   appBar: AppBar(
-      //     title: Text('Drag and Drop Example'),
-      //   ),
-      //   body: WidgetList(),
-      // ),
     );
   }
 }
