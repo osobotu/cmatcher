@@ -29,4 +29,10 @@ class GameController {
     _userColors.value = colors;
     _getCorrectColors();
   }
+
+  void reset() {
+    final newColors = List<Color>.from(_gameEngine.resetUserColors());
+    _getCorrectColors();
+    _userColors.value = newColors;
+  }
 }

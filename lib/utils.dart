@@ -39,7 +39,7 @@ class Utils {
       case Colors.blue:
         return "Blue";
       default:
-        return "Unknown Color";
+        return "";
     }
   }
 

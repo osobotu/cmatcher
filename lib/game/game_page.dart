@@ -22,6 +22,14 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
     gameController = GameController(gameEngine: gameEngine);
   }
 
+  List<Color> swapItems(int fromIndex, int toIndex) {
+    final newColors = List<Color>.from(gameController.userColors.value);
+    final temp = newColors[fromIndex];
+    newColors[fromIndex] = newColors[toIndex];
+    newColors[toIndex] = temp;
+    return newColors;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,6 +44,12 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
           ValueListenableBuilder(
             valueListenable: gameController.correctColors,
             builder: (context, numberOfCorrectColors, _) {
+              if (numberOfCorrectColors == 5) {
+                return Text(
+                  "Whoops! All colors match",
+                  style: Theme.of(context).textTheme.titleMedium,
+                );
+              }
               return Text(
                 "$numberOfCorrectColors color(s) are correctly placed",
                 style: Theme.of(context).textTheme.titleMedium,
@@ -47,62 +61,33 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
             valueListenable: gameController.userColors,
             builder: (context, colors, _) {
               return Flexible(
-                child: ReorderableListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    buildDefaultDragHandles: false,
-                    itemBuilder: (context, index) {
-                      return ReorderableDragStartListener(
-                        key: ValueKey(colors[index]),
-                        index: index,
-                        child: ColorWidget(
-                          key: ValueKey(colors[index]),
-                          color: colors[index],
-                        ),
-                      );
-                    },
-                    itemCount: colors.length,
-                    onReorder: (int oldIndex, int newIndex) {
-                      setState(() {
-                        // Swap the items
-                        final temp = colors[oldIndex];
-                        colors[oldIndex] = colors[newIndex];
-                        colors[newIndex] = temp;
-                        // if (newIndex > oldIndex) {
-                        //   newIndex -= 1;
-                        // }
-                        // final item = colors.removeAt(oldIndex);
-                        // colors.insert(newIndex, item);
-                      });
-                      print("UI: ${Utils.printList(colors)}");
-                      gameController.updateUserColors(colors: colors);
-                    }),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: colors.length,
+                  itemBuilder: (context, index) {
+                    final color = colors[index];
+                    return Draggable<Color>(
+                      data: colors[index],
+                      feedback: FeedbackWidget(color: color),
+                      childWhenDragging: WhenDraggingWidget(color: color),
+                      child: DragTarget<Color>(
+                        onAccept: (Color fromColor) {
+                          final fromIndex = colors.indexOf(fromColor);
+                          final newColors = swapItems(fromIndex, index);
+                          gameController.updateUserColors(colors: newColors);
+                        },
+                        builder: (context, candidateData, rejectedData) {
+                          return ColorWidget(color: color);
+                        },
+                      ),
+                    );
+                  },
+                ),
               );
             },
           ),
-          // ValueListenableBuilder(
-          //   valueListenable: gameController.userColors,
-          //   builder: (context, colors, _) {
-          //     return Row(
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       children: [
-          //         ...colors.map(
-          //           (e) => DragTarget<Color>(
-          //             builder: (context, accepted, rejected) {
-          //               return Draggable(
-          //                 feedback: FeedbackWidget(color: e),
-          //                 child: ColorWidget(color: e),
-          //               );
-          //             },
-          //             onAcceptWithDetails: (details) {
-          //               // todo: replace this color with the dropped one and move this color to the picked position
-          //             },
-          //           ),
-          //         )
-          //       ],
-          //     );
-          //   },
-          // ),
           const SizedBox(height: 40),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -113,7 +98,9 @@ class _CMatcherGamePageState extends State<CMatcherGamePage> {
                 child: const Icon(Icons.undo),
               ),
               FloatingActionButton(
-                onPressed: () {},
+                onPressed: () {
+                  gameController.reset();
+                },
                 tooltip: 'Reset',
                 child: const Icon(Icons.restore),
               ),
@@ -160,6 +147,35 @@ class ColorWidget extends StatelessWidget {
   }
 }
 
+class WhenDraggingWidget extends StatelessWidget {
+  const WhenDraggingWidget({
+    super.key,
+    required this.color,
+  });
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Container(
+        width: 75,
+        height: 75,
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          border: Border.all(color: color),
+        ),
+        child: Center(
+          child: Text(
+            Utils.getColorName(color),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class FeedbackWidget extends StatelessWidget {
   const FeedbackWidget({
     super.key,
@@ -186,58 +202,6 @@ class FeedbackWidget extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class WidgetList extends StatefulWidget {
-  @override
-  _WidgetListState createState() => _WidgetListState();
-}
-
-class _WidgetListState extends State<WidgetList> {
-  List<String> items = [
-    'Widget 1',
-    'Widget 2',
-    'Widget 3',
-    'Widget 4',
-    'Widget 5'
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        return Draggable<int>(
-          data: index,
-          feedback: Material(
-            child: Container(
-              padding: EdgeInsets.all(8.0),
-              color: Colors.blue,
-              child: Text(
-                items[index],
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-          child: DragTarget<int>(
-            onAccept: (int fromIndex) {
-              setState(() {
-                // Swap the items
-                final temp = items[fromIndex];
-                items[fromIndex] = items[index];
-                items[index] = temp;
-              });
-            },
-            builder: (context, candidateData, rejectedData) {
-              return ListTile(
-                title: Text(items[index]),
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }
